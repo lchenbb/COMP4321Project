@@ -19,6 +19,9 @@ import java.net.URL;
 import helper.*;
 
 public class Indexer{
+	public static TitleIndexFileName = "indexesInPageTitle";
+	public static BodyIndexFileName = "indexInPageBody";
+	 
 	private HashSet stopwords;
 	private String SEPERATOR = "|";
 	private Porter porter;
