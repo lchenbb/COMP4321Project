@@ -13,3 +13,10 @@ stem->pageID,frequency,position
 by adding words position into the body we can support phrase search
 
 4. index file for page relationship:
+
+
+
+what is a document:
+word, other, word, other, .., word, other
+
+word: a char sequence containing only alphabets or numbers

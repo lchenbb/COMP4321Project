@@ -4,6 +4,9 @@ import java.util.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Vector;
+import java.util.StringTokenizer;
+import java.net.URL;
+import helper.*;
 import org.htmlparser.beans.StringBean;
 import org.htmlparser.Node;
 import org.htmlparser.NodeFilter;
@@ -13,19 +16,23 @@ import org.htmlparser.filters.NodeClassFilter;
 import org.htmlparser.tags.LinkTag;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
-import java.util.StringTokenizer;
 import org.htmlparser.beans.LinkBean;
-import java.net.URL;
-import helper.*;
+
+class WordAndItsPosition{
+	public String word;
+	public int position;
+	WordAndItsPosition(){
+		word="";
+		position=-1;
+	}
+}
 
 public class Indexer{
-	public static TitleIndexFileName = "indexesInPageTitle";
-	public static BodyIndexFileName = "indexInPageBody";
-	 
 	private HashSet stopwords;
-	private String SEPERATOR = "|";
 	private Porter porter;
-	public Indexer(){
+
+	public Indexer()
+	{
 		stopwords = new HashSet();
 		porter = new Porter();
 		try{
@@ -35,18 +42,9 @@ public class Indexer{
 		}
 	}
 
-	// get the page content from ur;
-	public String getPage(String _url) throws ParserException
-	{
-		StringBean bean = new StringBean();
-		bean.setURL(_url);
-		bean.setLinks(false);
-		return bean.getStrings();
-	}
-	
 	// load the stop words from stopwords.txt
 	// all of the words is in lower case
-	public void loadStopWordsList(String file) throws FileNotFoundException
+	private void loadStopWordsList(String file) throws FileNotFoundException
 	{
 		Scanner in = new Scanner(new File(file));
 		while(in.hasNextLine()){
@@ -57,103 +55,74 @@ public class Indexer{
 		in.close();
 	}
 
-	// replace all characters which are NOT alphabet or numbers with whitespace
-	// and turn them into lower case
-	public String preprocssingString(String word){
-		word = word.replaceAll("[^A-Za-z0-9]"," ");
-		word = word.toLowerCase();
-		return word;
+	// turn the word into stem
+	private String turnWordIntoStem(String word)
+	{
+		return porter.stripAffixes(word);
 	}
 
-	// remove all stopwords from string
-	public String removeStopWords(String content)
+	private Boolean isStopWord(String word){
+		return stopwords.contains(word);
+	}
+
+	// remove all stopwords, get the stem and its position
+	public Vector<WordAndItsPosition> processContent(String content)
 	{
-		String result = "";
-		StringTokenizer st = new StringTokenizer(content," ");
-		while(st.hasMoreTokens()){
-			String word = st.nextToken();
-			if(!stopwords.contains(word)){
-				result += word+SEPERATOR;
+		content = content.toLowerCase();
+		int pos = 0;
+		Vector<WordAndItsPosition> result = new Vector<WordAndItsPosition>();
+
+		String[] sentences = content.split("[^A-Za-z0-9 ]");
+		for(int i=0;i<sentences.length;++i){
+			String sentence = sentences[i].trim();
+			if(!sentence.equals("")){
+				int num=0;
+
+				StringTokenizer st = new StringTokenizer(sentence," ");
+				while(st.hasMoreTokens()){
+					String word = st.nextToken();
+					if(!isStopWord(word)){
+						String stem = turnWordIntoStem(word);
+						WordAndItsPosition tuple = new WordAndItsPosition();
+						tuple.word = stem;
+						tuple.position = pos;
+						result.add(tuple);
+						num++;
+						pos++;
+					}
+				}
+
+				if(num!=0)pos++;
 			}
 		}
+
 		return result;
 	}
 
-	public void index(String url)
+	public void index(String content)
 	{
 		try{
-			String page = getPage(url);
 			String title;// title
-			String bodyString;// content in page body
-			int indexOfFirstReturn = page.indexOf("\n");
-			title = page.substring(0,indexOfFirstReturn);
-			bodyString = page.substring(indexOfFirstReturn);
+			String body;// content in page body
+			int indexOfFirstReturn = content.indexOf("\n");
+			title = content.substring(0,indexOfFirstReturn);
+			body = content.substring(indexOfFirstReturn);
+			
+			Vector<WordAndItsPosition> titleVec = processContent(title);
+			Vector<WordAndItsPosition> bodyVec = processContent(body);
 
-			title = preprocssingString(title);
-			bodyString = preprocssingString(bodyString);
-			title = removeStopWords(title);
-			bodyString = removeStopWords(bodyString);
-			//System.out.println("title: "+title+"\n");
-			//System.out.println("body:  "+bodyString+"\n");
-			Vector<String> stemInTitle = new Vector<String>();
-			Vector<String> stemInBody = new Vector<String>();
-
-			StringTokenizer st1 = new StringTokenizer(title,SEPERATOR);
-			while(st1.hasMoreTokens()){
-				String word = st1.nextToken();
-				stemInTitle.add(porter.stripAffixes(word));
-			}
-			StringTokenizer st2 = new StringTokenizer(bodyString,SEPERATOR);
-			while(st2.hasMoreTokens()){
-				String word = st2.nextToken();
-				stemInBody.add(porter.stripAffixes(word));
-			}
-
-			for(int i=0;i<stemInTitle.size();++i){
-				System.out.print(stemInTitle.get(i)+SEPERATOR);
-			}
 			System.out.println();
-			System.out.println();
-			for(int i=0;i<stemInBody.size();++i){
-				System.out.print(stemInBody.get(i)+SEPERATOR);
+			System.out.println(title);
+			for(int i=0;i<titleVec.size();++i){
+				WordAndItsPosition temp = titleVec.get(i);
+				System.out.println(temp.word+" "+temp.position);
 			}
-			System.out.println();
-
-			InvertedIndex into = new InvertedIndex("a","B");
-			into.finalize();
 
 
-		}catch(ParserException e){
-			e.printStackTrace();
-		}catch(IOException e){
-			e.printStackTrace();
+
+
+		}catch(Exception e){
+
 		}
-	}
-	public static void main (String[] args)
-	{
-		String url;
-		if(args.length==0){
-			url = "http://www.cse.ust.hk";
-		}else if(args.length==1){
-			url = args[0];
-		}else{
-			System.out.println("Please enter a url for indexing, or using the default url defined in program");
-			return;
-		}
-		Indexer indexer = new Indexer();
-		indexer.index(url);
-	}
-
-	public void printAll(String title,Vector<String> bodyStrings){
-		System.out.println(title);
-		for(int i=0;i<bodyStrings.size();++i){
-			System.out.println(bodyStrings.get(i));
-		}
-		/*
-			Enumeration keys = stopwords.keys();
-			while(keys.hasMoreElements()){
-				String key = (String) keys.nextElement();
-				System.out.println(key+":666");
-			}*/
 	}
 }
