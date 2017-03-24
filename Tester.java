@@ -28,36 +28,44 @@ class Tester{
 		return bean.getStrings();
 	}
 
+	static String[] urls = {
+		"https://course.cse.ust.hk/comp4321/labs/TestPages/testpage.htm",
+		"https://course.cse.ust.hk/comp4321/labs/TestPages/ust_cse.htm",
+		"https://course.cse.ust.hk/comp4321/labs/TestPages/Movie/1.html",
+		"https://course.cse.ust.hk/comp4321/labs/TestPages/Movie/4.html",
+		"http://www.cse.ust.hk",
+		"http://www.ust.hk"
+	};
+
 	public static void main (String[] args)
 	{
-		long begin = System.currentTimeMillis();
-
-		long time = System.currentTimeMillis();
-
-		String url;
-		if(args.length==0){
-			url = "http://www.cse.ust.hk";
-		}else if(args.length==1){
-			url = args[0];
-		}else{
-			System.out.println("Please enter a url for indexing, or using the default url defined in program");
-			return;
-		}
 		try{
-			System.out.println("get url time: "+(System.currentTimeMillis()-begin));
-			begin = System.currentTimeMillis();
+			long begin = System.currentTimeMillis();
 
-			String content = getPage(url);
+			long time = System.currentTimeMillis();
 
-			System.out.println("get page time: "+(System.currentTimeMillis()-begin));
+			String url;
+
 			begin = System.currentTimeMillis();
-	
 			Indexer indexer = new Indexer();
-
 			System.out.println("indexer construction time: "+(System.currentTimeMillis()-begin));
-			begin = System.currentTimeMillis();
 
-			indexer.index(url,content);
+			for(int i=0;i<urls.length;++i){
+				begin = System.currentTimeMillis();
+				url = urls[i];
+				String content = getPage(url);
+				System.out.println("get page time: "+(System.currentTimeMillis()-begin));
+
+				begin = System.currentTimeMillis();
+				indexer.index(url,content);
+				System.out.println("index time: "+(System.currentTimeMillis()-begin));
+			}
+
+			begin = System.currentTimeMillis();
+			indexer.writeIndexesIntoFile();
+			System.out.println("write data time: "+(System.currentTimeMillis()-begin));
+
+			System.out.println("total time: "+(System.currentTimeMillis()-time));
 		}
 		catch(ParserException e){
 			e.printStackTrace();
@@ -65,7 +73,5 @@ class Tester{
 		catch(IOException e){
 			e.printStackTrace();
 		}
-
-		System.out.println("total time: "+(System.currentTimeMillis()-time));
 	}
 }

@@ -140,7 +140,7 @@ public class Indexer{
 			invertedIndex.addEntry(word,pageID,hash.get(word));
 		}
 		//invertedIndex.printAll();
-		invertedIndex.finalize();
+		//invertedIndex.finalize();
 		hash.clear();
 	}
 
@@ -155,13 +155,13 @@ public class Indexer{
 			title = content.substring(0,indexOfFirstReturn);
 			body = content.substring(indexOfFirstReturn);
 
-			System.out.println("seperate time: "+(System.currentTimeMillis()-begin));
+			//System.out.println("seperate time: "+(System.currentTimeMillis()-begin));
 			begin = System.currentTimeMillis();
 			
 			Vector<WordAndItsPosition> titleVec = processContent(title);
 			Vector<WordAndItsPosition> bodyVec = processContent(body);
 
-			System.out.println("process time: "+(System.currentTimeMillis()-begin));
+			//System.out.println("process time: "+(System.currentTimeMillis()-begin));
 			begin = System.currentTimeMillis();
 
 			Integer urlID = mapTable.getIDByURL(url);
@@ -169,8 +169,13 @@ public class Indexer{
 			insertIndexIntoFile(titleVec, titleInvertedIndex, urlID);
 			insertIndexIntoFile(bodyVec, bodyInvertedIndex, urlID);
 
-			System.out.println("insertion time: "+(System.currentTimeMillis()-begin));
+			//System.out.println("insertion time: "+(System.currentTimeMillis()-begin));
 			
 
+	}
+
+	public void writeIndexesIntoFile() throws IOException{
+		titleInvertedIndex.finalize();
+		bodyInvertedIndex.finalize();
 	}
 }
