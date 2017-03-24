@@ -1,5 +1,5 @@
-javac -cp ./:./lib/jdbm-1.0.jar:./lib/guava-21.0.jar ./helper/IDConvertTable.java
-javac -cp ./lib/jdbm-1.0.jar ./helper/InvertedIndex.java
-javac ./helper/Porter.java
-javac -cp ./:./lib/htmlparser.jar Indexer.java
-javac -cp ./:./lib/htmlparser.jar Tester.java
+javac -cp ./:./lib/* ./helper/IDConvertTable.java
+javac -cp ./:./lib/* ./helper/InvertedIndex.java
+javac -cp ./:./lib/* ./helper/Porter.java
+javac -cp ./:./lib/* Indexer.java
+javac -cp ./:./lib/* Tester.java

@@ -77,7 +77,7 @@ public class InvertedIndex
     }
     public void printAll() throws IOException
     {
-        IDConvertTable table = new IDConvertTable("IDConvertTable","ht2");
+        IDConvertTable table = new IDConvertTable("PageAndWordIDMapTable","PageAndWordIDMapTable");
 
         FastIterator iter = hashtable.keys();
         Integer wordid;

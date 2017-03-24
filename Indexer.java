@@ -84,7 +84,7 @@ public class Indexer{
 	}
 
 	// remove all stopwords, get the stem and its position
-	private Vector<WordAndItsPosition> processContent(String content)
+	private Vector<WordAndItsPosition> processContent(String content) throws IOException
 	{
 		content = content.toLowerCase();
 		int pos = 0;
@@ -102,7 +102,7 @@ public class Indexer{
 					if(!isStopWord(word)){
 						String stem = turnWordIntoStem(word);
 						WordAndItsPosition tuple = new WordAndItsPosition();
-						tuple.word = allIDConvertTableName.getIDByWord(stem);
+						tuple.word = mapTable.getIDByWord(stem);
 						tuple.position = pos;
 						result.add(tuple);
 						num++;
@@ -144,10 +144,9 @@ public class Indexer{
 		hash.clear();
 	}
 
-	public void index(String url, String content)
+	public void index(String url, String content) throws IOException
 	{
-		try{
-			Integer urlID = allIDConvertTableName.getIDByURL(url);
+
 			long begin = System.currentTimeMillis();
 
 			String title;// title
@@ -165,14 +164,13 @@ public class Indexer{
 			System.out.println("process time: "+(System.currentTimeMillis()-begin));
 			begin = System.currentTimeMillis();
 
+			Integer urlID = mapTable.getIDByURL(url);
+
 			insertIndexIntoFile(titleVec, titleInvertedIndex, urlID);
 			insertIndexIntoFile(bodyVec, bodyInvertedIndex, urlID);
 
 			System.out.println("insertion time: "+(System.currentTimeMillis()-begin));
 			
 
-		}catch(Exception e){
-
-		}
 	}
 }

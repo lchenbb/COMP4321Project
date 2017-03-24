@@ -1,5 +1,5 @@
 JFLAGS = -cp
-JAR = "lib/*"
+JAR = ./:./lib/*
 JC = javac
 .SUFFIXES: .java .class
 .java.class:

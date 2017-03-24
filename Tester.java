@@ -62,6 +62,9 @@ class Tester{
 		catch(ParserException e){
 			e.printStackTrace();
 		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
 
 		System.out.println("total time: "+(System.currentTimeMillis()-time));
 	}
