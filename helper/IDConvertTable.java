@@ -18,7 +18,7 @@ import com.google.common.collect.HashBiMap;
 This object converts bidirectionally from ID to word, ID to pageURL.
 
 Constructor (Load from databse)
-IDConvertTable table = new IDConvertTable("recordmanager","objectname");
+IDConvertTable index = new IDConvertTable("IDConvertTable","ht2");
 
 Add
 AddEntry is private! Indeed no need to add. Call getIDByWord/getIDByURL will add new entry if not found
