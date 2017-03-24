@@ -117,6 +117,32 @@ public class Indexer{
 		return 0;
 	}
 
+	private void insertIndexIntoFile(Vector<WordAndItsPosition> vec, InvertedIndex invertedIndex, String page)
+	throws IOException
+	{
+		Enumeration<String> words;
+
+		for(int i=0;i<vec.size();++i){
+			WordAndItsPosition temp = vec.get(i);
+			Set<Integer> set = hash.get(temp.word);
+			if(set!=null){
+				set.add(temp.position);
+				hash.put(temp.word,set);
+			}else{
+				set = new HashSet();
+				set.add(temp.position);
+				hash.put(temp.word, set);
+			}
+		}
+		words = hash.keys();
+		while(words.hasMoreElements()){
+			String word = words.nextElement();
+			invertedIndex.addEntry(word,pageToPageID(page),hash.get(word));
+		}
+		invertedIndex.finalize();
+		hash.clear();
+	}
+
 	public void index(String url, String content)
 	{
 		try{
@@ -129,49 +155,8 @@ public class Indexer{
 			Vector<WordAndItsPosition> titleVec = processContent(title);
 			Vector<WordAndItsPosition> bodyVec = processContent(body);
 
-			Enumeration<String> words;
-
-			for(int i=0;i<titleVec.size();++i){
-				WordAndItsPosition temp = titleVec.get(i);
-				Set<Integer> set = hash.get(temp.word);
-				if(set!=null){
-					set.add(temp.position);
-					hash.put(temp.word,set);
-				}else{
-					set = new HashSet();
-					set.add(temp.position);
-					hash.put(temp.word, set);
-				}
-			}
-			words = hash.keys();
-			while(words.hasMoreElements()){
-				String word = words.nextElement();
-				titleInvertedIndex.addEntry(word,pageToPageID(url),hash.get(word));
-			}
-			titleInvertedIndex.printAll();
-
-			hash.clear();
-
-			for(int i=0;i<bodyVec.size();++i){
-				WordAndItsPosition temp = bodyVec.get(i);
-				Set<Integer> set = hash.get(temp.word);
-				if(set!=null){
-					set.add(temp.position);
-					hash.put(temp.word,set);
-				}else{
-					set = new HashSet();
-					set.add(temp.position);
-					hash.put(temp.word, set);
-				}
-			}
-			words = hash.keys();
-			while(words.hasMoreElements()){
-				String word = words.nextElement();
-				bodyInvertedIndex.addEntry(word,pageToPageID(url),hash.get(word));
-			}
-			bodyInvertedIndex.printAll();
-
-			hash.clear();
+			insertIndexIntoFile(titleVec, titleInvertedIndex, url);
+			insertIndexIntoFile(bodyVec, bodyInvertedIndex, url);
 
 		}catch(Exception e){
 
