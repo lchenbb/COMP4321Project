@@ -63,6 +63,7 @@ public class Indexer{
 		Scanner in = new Scanner(new File(file));
 		while(in.hasNextLine()){
 			String line = in.nextLine();
+			line = line.trim();
 			line = line.toLowerCase();
 			stopwords.add(line);
 		}
@@ -94,7 +95,7 @@ public class Indexer{
 
 				StringTokenizer st = new StringTokenizer(sentence," ");
 				while(st.hasMoreTokens()){
-					String word = st.nextToken();
+					String word = st.nextToken().trim();
 					if(!isStopWord(word)){
 						String stem = turnWordIntoStem(word);
 						WordAndItsPosition tuple = new WordAndItsPosition();
@@ -139,6 +140,7 @@ public class Indexer{
 			String word = words.nextElement();
 			invertedIndex.addEntry(word,pageToPageID(page),hash.get(word));
 		}
+		//invertedIndex.printAll();
 		invertedIndex.finalize();
 		hash.clear();
 	}
@@ -146,17 +148,28 @@ public class Indexer{
 	public void index(String url, String content)
 	{
 		try{
+			long begin = System.currentTimeMillis();
+
 			String title;// title
 			String body;// content in page body
 			int indexOfFirstReturn = content.indexOf("\n");
 			title = content.substring(0,indexOfFirstReturn);
 			body = content.substring(indexOfFirstReturn);
+
+			System.out.println("seperate time: "+(System.currentTimeMillis()-begin));
+			begin = System.currentTimeMillis();
 			
 			Vector<WordAndItsPosition> titleVec = processContent(title);
 			Vector<WordAndItsPosition> bodyVec = processContent(body);
 
+			System.out.println("process time: "+(System.currentTimeMillis()-begin));
+			begin = System.currentTimeMillis();
+
 			insertIndexIntoFile(titleVec, titleInvertedIndex, url);
 			insertIndexIntoFile(bodyVec, bodyInvertedIndex, url);
+
+			System.out.println("insertion time: "+(System.currentTimeMillis()-begin));
+			
 
 		}catch(Exception e){
 
