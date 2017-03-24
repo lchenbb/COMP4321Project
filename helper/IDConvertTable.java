@@ -44,17 +44,19 @@ public class IDConvertTable
         recman = RecordManagerFactory.createRecordManager(recordmanager);
         long recid = recman.getNamedObject(objectname);
 
-        if (recid != 0)
+        if (recid != 0){
             hashtable = HTree.load(recman, recid);
+        }
         else
         {
             hashtable = HTree.createInstance(recman);
             recman.setNamedObject( objectname, hashtable.getRecid() );
+            BiMap<String, Integer> wordbiMap = HashBiMap.create();
+            BiMap<String, Integer> pagebiMap = HashBiMap.create();
+            hashtable.put("word",wordbiMap);
+            hashtable.put("url",pagebiMap);
         }
-        BiMap<String, Integer> wordbiMap = HashBiMap.create();
-        BiMap<String, Integer> pagebiMap = HashBiMap.create();
-        hashtable.put("word",wordbiMap);
-        hashtable.put("url",pagebiMap);
+
     }
 
     public void finalize() throws IOException
@@ -71,6 +73,7 @@ public class IDConvertTable
         Integer id = new Integer(table.size());
         table.put(value,id);
         hashtable.put(type,table);
+        recman.commit();
         return id;
     }
     public void delEntry(String word) throws IOException
@@ -79,11 +82,13 @@ public class IDConvertTable
     }
 
     public String getWordByID(Integer id) throws IOException{
+        @SuppressWarnings("unchecked")
         BiMap<String, Integer> table = (BiMap<String, Integer>)hashtable.get("word");
         return table.inverse().get(id);
     }
 
     public Integer getIDByWord(String word) throws IOException{
+        @SuppressWarnings("unchecked")
         BiMap<String, Integer> table = (BiMap<String, Integer>)hashtable.get("word");
         if (!table.containsKey(word)){
           return addEntry("word",word);
@@ -93,11 +98,13 @@ public class IDConvertTable
         }
     }
     public String getURLByID(Integer id) throws IOException{
+        @SuppressWarnings("unchecked")
         BiMap<String, Integer> table = (BiMap<String, Integer>)hashtable.get("url");
         return table.inverse().get(id);
     }
 
     public Integer getIDByURL(String url) throws IOException{
+        @SuppressWarnings("unchecked")
         BiMap<String, Integer> table = (BiMap<String, Integer>)hashtable.get("url");
         if (!table.containsKey(url)){
           return addEntry("url",url);
@@ -111,14 +118,14 @@ public class IDConvertTable
     // {
     //     try
     //     {
-    //         IDConvertTable index = new IDConvertTable("IDConvertTable","ht1");
+    //         IDConvertTable index = new IDConvertTable("IDConvertTable","ht2");
     //         System.out.println(index.getWordByID(0));
     //         System.out.println(index.getIDByWord("word"));
-    //         System.out.println(index.getIDByWord("word1"));
-    //         System.out.println(index.getIDByWord("word2"));
-    //         System.out.println(index.getIDByWord("word"));
-    //         System.out.println(index.getIDByWord("word"));
-    //         System.out.println(index.getWordByID(0));
+    //         // System.out.println(index.getIDByWord("word1"));
+    //         // System.out.println(index.getIDByWord("word2"));
+    //         // System.out.println(index.getIDByWord("word"));
+    //         // System.out.println(index.getIDByWord("word"));
+    //         // System.out.println(index.getWordByID(0));
     //         index.finalize();
     //     }
     //     catch(IOException ex)

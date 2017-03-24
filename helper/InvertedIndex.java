@@ -8,36 +8,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
-/* Drop a note here if need to add any function
-
-*/
-
-/* Interface
-Constructor (Load from databse)
-InvertedIndex index = new InvertedIndex("recordmanager","objectname");
-
-Add Entry
-Set<Integer> p = new HashSet<Integer>(Arrays.asList(1, 2, 3, 7, 5));
-index.addEntry("word", Integer pageID, Set<Integer> positions);
-
-Save to Database (Commit change)
-index.finalize();
-
-Print
-index.printall();
-
-Access
-Member: private HTree hashtable;
-// Get words info by word
-Map<Integer, WordInfoInPage> wordinfo = (Map<Integer, WordInfoInPage>)hashtable.get(String word);
-// Get words' position by pageID
-SortedSet<Integer> wordposition = wordinfo.get(Integer PageID);
-// Get words' frequency by pageID
-private int frequency = wordinfo.get(Integer PageID);
-
-Refer to main for a demo.
-*/
-
 public class InvertedIndex
 {
     private RecordManager recman;
@@ -82,10 +52,10 @@ public class InvertedIndex
         recman.close();
     }
 
-    public void addEntry(String word, Integer pageID, Set<Integer> positions) throws IOException
+    public void addEntry(Integer wordID, Integer pageID, Set<Integer> positions) throws IOException
     {
         @SuppressWarnings("unchecked")
-        Map<Integer, WordInfoInPage> content = (Map<Integer, WordInfoInPage>)hashtable.get(word);
+        Map<Integer, WordInfoInPage> content = (Map<Integer, WordInfoInPage>)hashtable.get(wordID);
 
         if (content==null){
           content = new TreeMap<>();
@@ -99,7 +69,7 @@ public class InvertedIndex
           wordinfo.addByPosition(positions);
         }
         content.put(pageID,wordinfo);
-        hashtable.put(word,content);
+        hashtable.put(wordID,content);
     }
     public void delEntry(String word) throws IOException
     {
@@ -107,12 +77,14 @@ public class InvertedIndex
     }
     public void printAll() throws IOException
     {
+        IDConvertTable table = new IDConvertTable("IDConvertTable","ht2");
+
         FastIterator iter = hashtable.keys();
-        String key;
-        while( (key=(String)iter.next()) != null ) {
-          System.out.println(key);
+        Integer wordid;
+        while( (wordid=(Integer)iter.next()) != null ) {
+          System.out.println(table.getWordByID(wordid));
           @SuppressWarnings("unchecked")
-          Map<Integer, WordInfoInPage> content = (Map<Integer, WordInfoInPage>)hashtable.get(key);
+          Map<Integer, WordInfoInPage> content = (Map<Integer, WordInfoInPage>)hashtable.get(wordid);
 
           for (Integer pageid : content.keySet()) {
             System.out.print("PageID " + pageid);
@@ -131,21 +103,20 @@ public class InvertedIndex
     // {
     //     try
     //     {
-    //         InvertedIndex index = new InvertedIndex("lab1","ht1");
+    //       InvertedIndex index = new InvertedIndex("InvertedIndex","ht1");
     //
-    //         Set<Integer> p1 = new HashSet<Integer>(Arrays.asList(10, 20, 30));
-    //         Set<Integer> p2 = new HashSet<Integer>(Arrays.asList(1, 2, 3));
-    //         Set<Integer> p3 = new HashSet<Integer>(Arrays.asList(1, 2, 3, 7, 5));
-    //         index.addEntry("cat", 2, p1);
-    //         index.addEntry("cat", 2, p2);
-    //         index.addEntry("cat", 1, p1);
-    //         index.addEntry("cat", 23, p2);
-    //         index.addEntry("cat", 101, p1);
-    //         index.addEntry("dog", 1, p1);
-    //         index.addEntry("cat", 1, p3);
-    //         System.out.println("First print");
-    //         index.printAll();
-    //
+    //       // Set<Integer> p1 = new HashSet<Integer>(Arrays.asList(10, 20, 30));
+    //       // Set<Integer> p2 = new HashSet<Integer>(Arrays.asList(1, 2, 3));
+    //       // Set<Integer> p3 = new HashSet<Integer>(Arrays.asList(1, 2, 3, 7, 5));
+    //       // index.addEntry(0, 2, p1);
+    //       // index.addEntry(1, 2, p2);
+    //       // index.addEntry(2, 1, p1);
+    //       // index.addEntry(0, 23, p2);
+    //       // index.addEntry(0, 101, p1);
+    //       // index.addEntry(1, 1, p1);
+    //       // index.addEntry(2, 1, p3);
+    //       index.printAll();
+    //       index.finalize();
     //     }
     //     catch(IOException ex)
     //     {
