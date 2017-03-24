@@ -31,6 +31,9 @@ class Tester{
 	public static void main (String[] args)
 	{
 		long begin = System.currentTimeMillis();
+
+		long time = System.currentTimeMillis();
+
 		String url;
 		if(args.length==0){
 			url = "http://www.cse.ust.hk";
@@ -41,13 +44,25 @@ class Tester{
 			return;
 		}
 		try{
+			System.out.println("get url time: "+(System.currentTimeMillis()-begin));
+			begin = System.currentTimeMillis();
+
 			String content = getPage(url);
 
+			System.out.println("get page time: "+(System.currentTimeMillis()-begin));
+			begin = System.currentTimeMillis();
+	
 			Indexer indexer = new Indexer();
+
+			System.out.println("indexer construction time: "+(System.currentTimeMillis()-begin));
+			begin = System.currentTimeMillis();
+
 			indexer.index(url,content);
-		}catch(ParserException e){
+		}
+		catch(ParserException e){
 			e.printStackTrace();
 		}
-		System.out.println(System.currentTimeMillis()-begin);
+
+		System.out.println("total time: "+(System.currentTimeMillis()-time));
 	}
 }
