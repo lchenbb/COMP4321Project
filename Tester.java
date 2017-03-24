@@ -43,7 +43,7 @@ class Tester{
 			String content = getPage(url);
 
 			Indexer indexer = new Indexer();
-			indexer.index(content);
+			indexer.index(url,content);
 		}catch(ParserException e){
 			e.printStackTrace();
 		}

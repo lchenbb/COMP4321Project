@@ -30,11 +30,25 @@ class WordAndItsPosition{
 public class Indexer{
 	private HashSet stopwords;
 	private Porter porter;
+	private InvertedIndex titleInvertedIndex;
+	private InvertedIndex bodyInvertedIndex;
+
+	private Hashtable< String, Set<Integer> > hash;
+
+	private String titleInvertedIndexName = "TitleInvertedIndex";
+	private String bodyInvertedIndexName = "BodyInvertedIndex";
 
 	public Indexer()
 	{
 		stopwords = new HashSet();
 		porter = new Porter();
+		hash = new Hashtable< String, Set<Integer> >();
+		try{
+			titleInvertedIndex = new InvertedIndex(titleInvertedIndexName, titleInvertedIndexName);
+			bodyInvertedIndex = new InvertedIndex(bodyInvertedIndexName, bodyInvertedIndexName);
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 		try{
 			loadStopWordsList("stopwords.txt");
 		}catch(FileNotFoundException e){
@@ -66,7 +80,7 @@ public class Indexer{
 	}
 
 	// remove all stopwords, get the stem and its position
-	public Vector<WordAndItsPosition> processContent(String content)
+	private Vector<WordAndItsPosition> processContent(String content)
 	{
 		content = content.toLowerCase();
 		int pos = 0;
@@ -99,7 +113,11 @@ public class Indexer{
 		return result;
 	}
 
-	public void index(String content)
+	private Integer pageToPageID(String page){
+		return 0;
+	}
+
+	public void index(String url, String content)
 	{
 		try{
 			String title;// title
@@ -111,15 +129,49 @@ public class Indexer{
 			Vector<WordAndItsPosition> titleVec = processContent(title);
 			Vector<WordAndItsPosition> bodyVec = processContent(body);
 
-			System.out.println();
-			System.out.println(title);
+			Enumeration<String> words;
+
 			for(int i=0;i<titleVec.size();++i){
 				WordAndItsPosition temp = titleVec.get(i);
-				System.out.println(temp.word+" "+temp.position);
+				Set<Integer> set = hash.get(temp.word);
+				if(set!=null){
+					set.add(temp.position);
+					hash.put(temp.word,set);
+				}else{
+					set = new HashSet();
+					set.add(temp.position);
+					hash.put(temp.word, set);
+				}
 			}
+			words = hash.keys();
+			while(words.hasMoreElements()){
+				String word = words.nextElement();
+				titleInvertedIndex.addEntry(word,pageToPageID(url),hash.get(word));
+			}
+			titleInvertedIndex.printAll();
 
+			hash.clear();
 
+			for(int i=0;i<bodyVec.size();++i){
+				WordAndItsPosition temp = bodyVec.get(i);
+				Set<Integer> set = hash.get(temp.word);
+				if(set!=null){
+					set.add(temp.position);
+					hash.put(temp.word,set);
+				}else{
+					set = new HashSet();
+					set.add(temp.position);
+					hash.put(temp.word, set);
+				}
+			}
+			words = hash.keys();
+			while(words.hasMoreElements()){
+				String word = words.nextElement();
+				bodyInvertedIndex.addEntry(word,pageToPageID(url),hash.get(word));
+			}
+			bodyInvertedIndex.printAll();
 
+			hash.clear();
 
 		}catch(Exception e){
 
