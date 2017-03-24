@@ -30,6 +30,7 @@ class Tester{
 
 	public static void main (String[] args)
 	{
+		long begin = System.currentTimeMillis();
 		String url;
 		if(args.length==0){
 			url = "http://www.cse.ust.hk";
@@ -47,5 +48,6 @@ class Tester{
 		}catch(ParserException e){
 			e.printStackTrace();
 		}
+		System.out.println(System.currentTimeMillis()-begin);
 	}
 }
