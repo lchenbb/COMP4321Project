@@ -8,6 +8,36 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
+/* Drop a note here if need to add any function
+
+*/
+
+/* Interface
+Constructor (Load from databse)
+InvertedIndex index = new InvertedIndex("recordmanager","objectname");
+
+Add Entry
+Set<Integer> p = new HashSet<Integer>(Arrays.asList(1, 2, 3, 7, 5));
+index.addEntry("word", Integer pageID, Set<Integer> positions);
+
+Save to Database (Commit change)
+index.finalize();
+
+Print
+index.printall();
+
+Access
+Member: private HTree hashtable;
+// Get words info by word
+Map<Integer, WordInfoInPage> wordinfo = (Map<Integer, WordInfoInPage>)hashtable.get(String word);
+// Get words' position by pageID
+SortedSet<Integer> wordposition = wordinfo.get(Integer PageID);
+// Get words' frequency by pageID
+private int frequency = wordinfo.get(Integer PageID);
+
+Refer to main for a demo.
+*/
+     
 public class InvertedIndex
 {
     private RecordManager recman;
