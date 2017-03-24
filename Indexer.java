@@ -19,10 +19,10 @@ import org.htmlparser.util.ParserException;
 import org.htmlparser.beans.LinkBean;
 
 class WordAndItsPosition{
-	public String word;
-	public int position;
+	public Integer word;
+	public Integer position;
 	WordAndItsPosition(){
-		word="";
+		word=-1;
 		position=-1;
 	}
 }
@@ -32,20 +32,23 @@ public class Indexer{
 	private Porter porter;
 	private InvertedIndex titleInvertedIndex;
 	private InvertedIndex bodyInvertedIndex;
+	private IDConvertTable mapTable;
 
-	private Hashtable< String, Set<Integer> > hash;
+	private Hashtable< Integer, Set<Integer> > hash;
 
 	private String titleInvertedIndexName = "TitleInvertedIndex";
 	private String bodyInvertedIndexName = "BodyInvertedIndex";
+	private String allIDConvertTableName = "PageAndWordIDMapTable";
 
 	public Indexer()
 	{
 		stopwords = new HashSet();
 		porter = new Porter();
-		hash = new Hashtable< String, Set<Integer> >();
+		hash = new Hashtable< Integer, Set<Integer> >();
 		try{
 			titleInvertedIndex = new InvertedIndex(titleInvertedIndexName, titleInvertedIndexName);
 			bodyInvertedIndex = new InvertedIndex(bodyInvertedIndexName, bodyInvertedIndexName);
+			mapTable = new IDConvertTable(allIDConvertTableName,allIDConvertTableName);
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -99,7 +102,7 @@ public class Indexer{
 					if(!isStopWord(word)){
 						String stem = turnWordIntoStem(word);
 						WordAndItsPosition tuple = new WordAndItsPosition();
-						tuple.word = stem;
+						tuple.word = allIDConvertTableName.getIDByWord(stem);
 						tuple.position = pos;
 						result.add(tuple);
 						num++;
@@ -114,14 +117,10 @@ public class Indexer{
 		return result;
 	}
 
-	private Integer pageToPageID(String page){
-		return 0;
-	}
-
-	private void insertIndexIntoFile(Vector<WordAndItsPosition> vec, InvertedIndex invertedIndex, String page)
+	private void insertIndexIntoFile(Vector<WordAndItsPosition> vec, InvertedIndex invertedIndex, Integer pageID)
 	throws IOException
 	{
-		Enumeration<String> words;
+		Enumeration<Integer> words;
 
 		for(int i=0;i<vec.size();++i){
 			WordAndItsPosition temp = vec.get(i);
@@ -137,8 +136,8 @@ public class Indexer{
 		}
 		words = hash.keys();
 		while(words.hasMoreElements()){
-			String word = words.nextElement();
-			invertedIndex.addEntry(word,pageToPageID(page),hash.get(word));
+			Integer word = words.nextElement();
+			invertedIndex.addEntry(word,pageID,hash.get(word));
 		}
 		//invertedIndex.printAll();
 		invertedIndex.finalize();
@@ -148,6 +147,7 @@ public class Indexer{
 	public void index(String url, String content)
 	{
 		try{
+			Integer urlID = allIDConvertTableName.getIDByURL(url);
 			long begin = System.currentTimeMillis();
 
 			String title;// title
@@ -165,8 +165,8 @@ public class Indexer{
 			System.out.println("process time: "+(System.currentTimeMillis()-begin));
 			begin = System.currentTimeMillis();
 
-			insertIndexIntoFile(titleVec, titleInvertedIndex, url);
-			insertIndexIntoFile(bodyVec, bodyInvertedIndex, url);
+			insertIndexIntoFile(titleVec, titleInvertedIndex, urlID);
+			insertIndexIntoFile(bodyVec, bodyInvertedIndex, urlID);
 
 			System.out.println("insertion time: "+(System.currentTimeMillis()-begin));
 			
