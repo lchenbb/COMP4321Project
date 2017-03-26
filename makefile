@@ -6,11 +6,11 @@ JC = javac
 	$(JC) $(JFLAGS) $(JAR) $*.java
 
 CLASSES = \
-	Indexer.java 
+	Tester.java 
 
 default: classes
 
 classes: $(CLASSES:.java=.class)
 
 clean:
-	$(RM) *.class
+	$(RM) *.class ./*/*.class *.db *.lg
